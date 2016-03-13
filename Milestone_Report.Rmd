@@ -1,0 +1,24 @@
+---
+title: "Milestone Report"
+author: "Scott Brenstuhl"
+date: "March 12, 2016"
+output: html_document
+---
+
+```{r, echo=FALSE}
+library('tm')
+library('readr')
+```
+
+
+```{r, echo=FALSE}
+en_twit <- read_table('final/en_US/en_US.twitter.txt', col_names = FALSE)
+en_blog <- read_table('final/en_US/en_US.blogs.txt', col_names = FALSE)
+en_news <- read_table('final/en_US/en_US.news.txt', col_names = FALSE)
+```
+```{r}
+nrow(en_twit)
+nrow(en_blog)
+nrow(en_news)
+```
+

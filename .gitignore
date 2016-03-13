@@ -1,0 +1,4 @@
+final/
+venv/
+.RData
+.RHistory
