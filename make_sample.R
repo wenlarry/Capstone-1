@@ -11,9 +11,9 @@ blog_sample <- en_blog[sample(nrow(en_blog), round(nrow(en_blog)*.01)),]
 news_sample <- en_news[sample(nrow(en_news), round(nrow(en_news)*.01)),]
 
 # Write test files to test dir so easy to build Corpus
-write(twit_sample,'test/twitter_sample.txt')
-write(blog_sample, 'test/blog_sample.txt')
-write(news_sample, 'test/news_sample.txt')
+write(twit_sample,'sample/twitter_sample.txt')
+write(blog_sample, 'sample/blog_sample.txt')
+write(news_sample, 'sample/news_sample.txt')
 
 # If using interactively, uncomment below to drop the big files from env:
 # rm(en_blog)
