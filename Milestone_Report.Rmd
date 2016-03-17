@@ -17,6 +17,8 @@ en_blog <- readLines('final/en_US/en_US.blogs.txt', col_names = FALSE)
 en_news <- readLines('final/en_US/en_US.news.txt', col_names = FALSE)
 
 twit_sample <- readLines('sample/twitter_sample.txt')
+blog_sample <- readLines('sample/blog_sample.txt')
+news_sample <- readLines('sample/news_sample.txt')
 ```
 Goals:
 1. Demonstrate that you've downloaded the data and have successfully loaded it in.
@@ -49,26 +51,28 @@ text.stats(en_news)
 ```
 
 ```{r}
-#Remove Twitter handles, hashtags, and RT
-twit_sample <- gsub('(@\\S*)', ' ', twit_sample)
-twit_sample <- gsub('(#\\S*)', ' ', twit_sample)
-twit_sample <- gsub('\\bRT\\b', ' ', twit_sample)
-twit_sample <- gsub(':', ' ', twit_sample)
-
+# Pulling great list of dirty words to be removed
 dirty.words.link <- 'https://raw.githubusercontent.com/shutterstock/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words/master/en'
 dirty.words <- readLines(dirty.words.link)
 dirty.words <- paste0("\\b(",paste0(dirty.words,collapse="|"), ")\\b") 
 
-text.cleaner <- function(text.body){
+# Needs tested when I have internet access
+text.cleaner <- function(text.body, remove.profaity = TRUE){
     # Gets rid of all the dirty words
-    clean.text = gsub(dirty.words, ' ', text.body)
+    if(remove.profaity){
+        clean.text = gsub(dirty.words, ' ', text.body)
+    }else{
+        clean.text = text.body
+    }
     
     # This section is mostly aimed at twitter but will clean up
-    # references to unuseful twitter things in other sources.
+    # references to twitter things in other sources.
     clean.text = gsub('(@\\S*)', ' ', clean.text)
     clean.text = gsub('(#\\S*)', ' ', clean.text)
     clean.text = gsub('\\bRT\\b', ' ', clean.text)
+    # Regex was really figthing me when I tried to get RT: in one go
     clean.text = gsub(':', ' ', clean.text)
+    # Maybe remove duplicate tweets at this point
 }
 
 # Return summary stats
@@ -76,9 +80,45 @@ text.stats <- function(text.body){
     rows.count = length(text.body)
     words.count = sum(stri_count_words(text.body))
     paste('Rows:', rows.count, "Words:", words.count)
+    
 }
 
 text.stats(twit_sample)
+
 ```
 
+```{r}
+# Prep the data for corpus
+sourcify <- function(text.body, clean = TRUE, remove.profanity = TRUE){
+    if(clean){
+        text.body = text.cleaner(text.body, remove.profaity)
+    }
+    VectorSource(text.body)
+}
+
+# Figure out a good way to loop through them all
+corp_sources <- VectorSource(list(blog_sample,
+                                  twit_sample,
+                                  news_sample))
+
+corp <- Corpus(corp_sources, readerControl = list(language="en"))
+summary(corp)
+
+corp <- tm_map(corp, removeNumbers)
+corp <- tm_map(corp, removePunctuation)
+corp <- tm_map(corp, stripWhitespace)
+corp <- tm_map(corp, tolower)
+# What exactly does this do? BESIDES BREAK EVERYTHING
+#corp <- tm_map(corp, removeWords, stopwords("english"))
+corp <- tm_map(corp, stemDocument, language = "english")
+corp <- tm_map(corp, PlainTextDocument)
+
+dtm <- DocumentTermMatrix(corp) 
+dtm[2:4]
+
+summary(corp)
+#
+inspect(corp[1])[[1]][1]
+```
 most popular bi and tri grams by source
+Check for repetative long n-grams (are likelty bad to keep if boilerplate)
