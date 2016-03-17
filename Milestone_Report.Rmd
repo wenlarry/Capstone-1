@@ -6,15 +6,17 @@ output: html_document
 ---
 
 ```{r, echo=FALSE}
+library(ggplot2)
 library(tm)
 library(readr)
 library(stringi)
+library(wordcloud)
 ```
 
 ```{r, echo=FALSE}
-en_twit <- readLines('final/en_US/en_US.twitter.txt', col_names = FALSE)
-en_blog <- readLines('final/en_US/en_US.blogs.txt', col_names = FALSE)
-en_news <- readLines('final/en_US/en_US.news.txt', col_names = FALSE)
+en_twit <- readLines('final/en_US/en_US.twitter.txt')
+en_blog <- readLines('final/en_US/en_US.blogs.txt')
+en_news <- readLines('final/en_US/en_US.news.txt')
 
 twit_sample <- readLines('sample/twitter_sample.txt')
 blog_sample <- readLines('sample/blog_sample.txt')
@@ -64,7 +66,6 @@ text.cleaner <- function(text.body, remove.profaity = TRUE){
     }else{
         clean.text = text.body
     }
-    
     # This section is mostly aimed at twitter but will clean up
     # references to twitter things in other sources.
     clean.text = gsub('(@\\S*)', ' ', clean.text)
@@ -75,50 +76,75 @@ text.cleaner <- function(text.body, remove.profaity = TRUE){
     # Maybe remove duplicate tweets at this point
 }
 
-# Return summary stats
-text.stats <- function(text.body){
-    rows.count = length(text.body)
-    words.count = sum(stri_count_words(text.body))
-    paste('Rows:', rows.count, "Words:", words.count)
-    
-}
-
-text.stats(twit_sample)
-
 ```
 
 ```{r}
 # Prep the data for corpus
 sourcify <- function(text.body, clean = TRUE, remove.profanity = TRUE){
     if(clean){
-        text.body = text.cleaner(text.body, remove.profaity)
+        text.body = text.cleaner(text.body, remove.profanity)
     }
     VectorSource(text.body)
 }
 
 # Figure out a good way to loop through them all
-corp_sources <- VectorSource(list(blog_sample,
+corp_sources <- VectorSource(lapply(list(blog_sample,
                                   twit_sample,
-                                  news_sample))
+                                  news_sample), sourcify))
 
 corp <- Corpus(corp_sources, readerControl = list(language="en"))
 summary(corp)
 
+corp <- tm_map(corp, content_transformer(function(x) iconv(x, to="ASCII", sub=" ")))
 corp <- tm_map(corp, removeNumbers)
 corp <- tm_map(corp, removePunctuation)
-corp <- tm_map(corp, stripWhitespace)
 corp <- tm_map(corp, tolower)
-# What exactly does this do? BESIDES BREAK EVERYTHING
-#corp <- tm_map(corp, removeWords, stopwords("english"))
+# This part causes intermitent problems and not sure it's a good thing to do anyways
+# corp <- tm_map(corp, removeWords, stopwords("english"))
+# Maybe dont do this when predicting
 corp <- tm_map(corp, stemDocument, language = "english")
+corp <- tm_map(corp, stripWhitespace)
 corp <- tm_map(corp, PlainTextDocument)
 
 dtm <- DocumentTermMatrix(corp) 
-dtm[2:4]
 
-summary(corp)
-#
-inspect(corp[1])[[1]][1]
+
+# Explore
+# inspect(corp[1])[[1]][1]
 ```
+
+```{r}
+freq <- colSums(as.matrix(dtm))
+length(freq)
+
+# shoudlnt be own var sort(freq) makes more sense maybe?
+ord <- order(freq)
+
+hist(freq)
+hist(freq[freq>10])
+hist(freq[freq>100])
+hist(freq[freq>1000])
+
+freq.table = sort(table(freq))
+
+# Would be cool to make gif of below getting higer and higher
+# freq.table = freq.table[as.numeric(names(freq.table))>8]
+# freq.table = freq.table[freq.table > 8]
+
+qplot(as.numeric(names(freq.table)), freq.table,
+      xlab= 'Appearances in Corpus', ylab = '# of Words with x Appearences')
+
+dtms <- removeSparseTerms(dtm, 0.1) 
+
+head(sort(freq, decreasing = TRUE), 50)
+
+# Random inspections
+#inspect(dtms[, 5000:5020])
+over.100 <- (freq[freq>100])
+wordcloud(names(over.100), over.100, max.words=100, colors=brewer.pal(6, "Dark2"))
+
+```
+
 most popular bi and tri grams by source
 Check for repetative long n-grams (are likelty bad to keep if boilerplate)
+Remove unix things
