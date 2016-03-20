@@ -15,7 +15,7 @@ library(wordcloud)
 ```
 
 
-```{r, echo=FALSE, alert=FALSE, message = FALSE, cache=TRUE}
+```{r, echo=FALSE, alert=FALSE, message = FALSE, cache=TRUE, warning=FALSE}
 en_twit <- readLines('final/en_US/en_US.twitter.txt')
 en_blog <- readLines('final/en_US/en_US.blogs.txt')
 en_news <- readLines('final/en_US/en_US.news.txt')
@@ -274,7 +274,10 @@ trouble <- c('don t',
 swr.ngram.freq <- colSums(as.matrix(sw.removed.ngram.dtm))
 swr.ngram.freq <- swr.ngram.freq[!(names(swr.ngram.freq) %in% trouble)]
 data.frame('occurences' = head(sort(swr.ngram.freq, decreasing = TRUE), 20))
-wordcloud(names(swr.ngram.freq), swr.ngram.freq, max.words=35,
+```
+
+```{r echo = FALSE, fig.width=6, fig.height=6}
+wordcloud(names(swr.ngram.freq), swr.ngram.freq, max.words=40,
           colors=brewer.pal(6, "Dark2"))
 ```
 
@@ -290,6 +293,9 @@ aren't actually more common.
 
 * Once everything is working use a larger sample than 1% and see if it improves
 results.
+
+* Potentially convert my tm functions to quanteda fuctions so that it runs
+faster.
 
 For the algorithm:
 
