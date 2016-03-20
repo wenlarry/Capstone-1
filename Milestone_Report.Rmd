@@ -27,9 +27,9 @@ news_sample <- readLines('sample/news_sample.txt')
 
 ## Summary
 
-Using the bodies of text samples provided by Coursera I am builind an app to
-predict what the next word will be when the begining of a phrase is entered. In
-this exploritory analysis I will share information about the data, my initial 
+Using the bodies of text samples provided by Coursera I am building an app to
+predict what the next word will be when the beginning of a phrase is entered. In
+this exploratory analysis I will share information about the data, my initial 
 findings and my plans of how to move forward with the app.
 
 ## The Data
@@ -37,7 +37,7 @@ findings and my plans of how to move forward with the app.
 Coursera provides all of the data here:</br>
 https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip
 </br>
-I am only taking the en_US subdirectory into consideration. If we look at all 
+I am only taking the en_US sub-directory into consideration. If we look at all 
 the data we see that it is massive:
 
 ```{r echo = FALSE}
@@ -61,7 +61,7 @@ rm(list = c('en_twit', 'en_blog', 'en_news'))
 ```
 
 Since these are so massive, I took a 1% sample of each for exploration. This
-brings the size of our data to a lot more managable size:
+brings the size of our data to a lot more manageable size:
 
 ```{r echo = FALSE}
 paste("The Twitter sample has",
@@ -74,14 +74,14 @@ paste("The news sample has",
 
 ## Data Prep
 
-Since this app will be used to predict the next word, we arn't goint to want
+Since this app will be used to predict the next word, we aren't going to want
 to suggest profanity (at least without the user opting into it). So for the 
 analysis I removed everything from this fantastic list:</br>
 https://github.com/shutterstock/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words/blob/master/en
 </br>
 
-I also droped all twitter handles, hastages, and "RT:"s since predicting them 
-seems outside the scope of this project. I have also removed unicode charicters 
+I also dropped all twitter handles, hastags, and "RT:"s since predicting them 
+seems outside the scope of this project. I have also removed unicode characters 
 and numbers to focus on text.
 
 ```{r echo = FALSE}
@@ -117,7 +117,7 @@ text.cleaner <- function(text.body, remove.profaity = TRUE){
 
 ```
 
-While capitolization, punctuation, and their full form may play an important 
+While capitalization, punctuation, and their full form may play an important 
 role when predicting, for now I am converting everything to lower case, removing 
 punctuation, and stemming the words. In text analysis it is common to remove
 stop words (the most commonly used words in a language) however for our purposes
@@ -129,9 +129,11 @@ exploring both with them and without.
 # Prep the data for corpus
 sourcify <- function(text.body, clean = TRUE, remove.profanity = TRUE){
     if(clean){
-        text.body = text.cleaner(text.body, remove.profanity)
+        text = text.cleaner(text.body, remove.profanity)
+        VectorSource(text)
+    }else{
+        VectorSource(text.body)
     }
-    VectorSource(text.body)
 }
 
 
@@ -174,9 +176,9 @@ sw.removed.ngram.dtm <- DocumentTermMatrix(sw.removed.corp,
 
 ### Unigrams 
 
-There are many, many, more words that are used rarely than thoughs that are used
-extreamly frequently. This pulls the histogram so far towards low numbers that
-the high frequency words aren't even visable.
+There are many, many, more words that are used rarely than those that are used
+extremely frequently. This pulls the histogram so far towards low numbers that
+the high frequency words aren't even visible.
 
 ```{r echo = FALSE}
 freq <- colSums(as.matrix(dtm))
@@ -190,8 +192,8 @@ hist(freq, breaks = 100)
 ```
 
 To highlight how many words are used only a handful of times and how frequently
-the most common words are used in a more visable way, I plotted the amount of 
-times each frequency occures.
+the most common words are used in a more visible way, I plotted the amount of 
+times each frequency occurs.
 
 ```{r echo = FALSE}
 freq.table = sort(table(freq))
@@ -205,8 +207,8 @@ qplot(as.numeric(names(freq.table)), freq.table,
 
 ```
 
-If we look at the top twenty most commonly used words and their occurences, we 
-can see just how dominate the most coomon stop words are. Even compared to the
+If we look at the top twenty most commonly used words and their occurrences, we 
+can see just how dominate the most common stop words are. Even compared to the
 top 50 most used words, "the" and "and" tower over the rest of the words.
 
 ```{r echo = FALSE}
@@ -216,10 +218,10 @@ over.100 <- (freq[freq>100])
 wordcloud(names(over.100), over.100, max.words=50, colors=brewer.pal(6, "Dark2"))
 ```
 
-If we also look at these same breakdowns with stopwords removed, we don't see
+If we also look at these same breakdowns with stop-words removed, we don't see
 anything too surprising, they are all words we are used to commonly seeing.
 
-```{r}
+```{r echo = FALSE}
 data.frame('occurences'= head(sort(swr.freq, decreasing = TRUE), 20))
 # Random inspections
 #inspect(dtms[, 5000:5020])
@@ -232,7 +234,7 @@ wordcloud(names(swr.over.100), swr.over.100, max.words=50, colors=brewer.pal(6, 
 
 We can repeat basically the same exercise on n-grams two to four words in 
 length. The histogram for this is so similarly skewed towards single digits that
-it isnt worth showing. Plotting the frequency of occurence counts is also rather
+it isn't worth showing. Plotting the frequency of occurrence counts is also rather
 similar:
 
 
@@ -246,13 +248,18 @@ qplot(as.numeric(names(nfreq.table)), nfreq.table,
 ```
 
 When we look at the most common n-grams, unsurprisingly it's basically just
-combinations of common stopwords.
+combinations of common stop-words.
 
 ```{r echo = FALSE}
 data.frame('occurences' = head(sort(nfreq, decreasing = TRUE), 20))
 wordcloud(names(nfreq), nfreq, max.words=50, colors=brewer.pal(6, "Dark2"))
 ```
 
+Then when we remove the common stop-words it gets a little more interesting,
+with phrases we are used to seeing:
+* When things happen: right now, last year, years ago, etc. 
+* City names: New York, New Jersey, and St. Louis 
+* Common statements: Good morning, happy birthday
 
 
 ```{r echo = FALSE}
@@ -266,8 +273,8 @@ trouble <- c('don t',
 
 swr.ngram.freq <- colSums(as.matrix(sw.removed.ngram.dtm))
 swr.ngram.freq <- swr.ngram.freq[!(names(swr.ngram.freq) %in% trouble)]
-head(sort(swr.ngram.freq, decreasing = TRUE), 20)
-wordcloud(names(swr.ngram.freq), swr.ngram.freq, max.words=45,
+data.frame('occurences' = head(sort(swr.ngram.freq, decreasing = TRUE), 20))
+wordcloud(names(swr.ngram.freq), swr.ngram.freq, max.words=35,
           colors=brewer.pal(6, "Dark2"))
 ```
 
@@ -275,10 +282,10 @@ wordcloud(names(swr.ngram.freq), swr.ngram.freq, max.words=45,
 
 A few things to improve data integrity:
 
-* Check for repetative long n-grams (are likelty bad to keep if they are just
+* Check for repetitive long n-grams (are likely bad to keep if they are just
 boilerplate items in blogs or news).
 
-* Consider remove duplicate tweets since if they are just coppies their phrases
+* Consider remove duplicate tweets since if they are just copies their phrases
 aren't actually more common.
 
 * Once everything is working use a larger sample than 1% and see if it improves
@@ -286,13 +293,18 @@ results.
 
 For the algorithm:
 
-* Figure out how to spit the last word off all the n-grams and find probablilty
+* Figure out how to spit the last word off all the n-grams and find probability
 of what word will follow it.
 
 * Turn that into a marcov chain to use when predicting the next word.
 
-* Learn more about backoff models and smoothing algorithms since they both
+* Learn more about back off models and smoothing algorithms since they both
 sound like they will lead to better predictions.
+
+* Possibly figure out how to include profanity in the marcov chains, so that
+we can predict more accurately, but not suggest it (without them opting in
+to such a thing.)
+
 
 The app
 
@@ -301,6 +313,8 @@ done. I am planning to just return the most likely answer when text is entered
 by the user. If it's possible to do so fast enough, I would love to return the
 top three most likely next words.
 
+* It would also be cool to log the users entries above where they type, so
+that they can do multiple sentences/entries and see them all.
 
-
-
+* If simple enough, it would be interesting to let user choose to have profanity
+predicted or not.
