@@ -15,7 +15,7 @@ library(wordcloud)
 ```
 
 
-```{r, echo=FALSE, alert=FALSE, message = FALSE}
+```{r, echo=FALSE, alert=FALSE, message = FALSE, cache=TRUE}
 en_twit <- readLines('final/en_US/en_US.twitter.txt')
 en_blog <- readLines('final/en_US/en_US.blogs.txt')
 en_news <- readLines('final/en_US/en_US.news.txt')
@@ -37,8 +37,8 @@ findings and my plans of how to move forward with the app.
 Coursera provides all of the data here:</br>
 https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip
 </br>
-I am only taking the en_US subdirectory into consideration. If we look at all the 
-data we see that it is massive:
+I am only taking the en_US subdirectory into consideration. If we look at all 
+the data we see that it is massive:
 
 ```{r echo = FALSE}
 # Return summary stats
@@ -56,7 +56,7 @@ paste("The news data has",
     text.stats(en_news))
 
 # Remove the big stuff that we aren't going to use anymore.
-rm(list = list(en_twit, en_blog, en_news))
+rm(list = c('en_twit', 'en_blog', 'en_news'))
 
 ```
 
@@ -65,12 +65,24 @@ brings the size of our data to a lot more managable size:
 
 ```{r echo = FALSE}
 paste("The Twitter sample has",
-    text.stats(en_twit))
+    text.stats(twit_sample))
 paste("The blog sample has",
-    text.stats(en_blog))
+    text.stats(blog_sample))
 paste("The news sample has",
-    text.stats(en_news))
+    text.stats(news_sample))
 ```
+
+## Data Prep
+
+Since this app will be used to predict the next word, we arn't goint to want
+to suggest profanity (at least without the user opting into it). So for the 
+analysis I removed everything from this fantastic list:</br>
+https://github.com/shutterstock/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words/blob/master/en
+</br>
+
+I also droped all twitter handles, hastages, and "RT:"s since predicting them 
+seems outside the scope of this project. I have also removed unicode charicters 
+and numbers to focus on text.
 
 ```{r echo = FALSE}
 # Pulling great list of dirty words to be removed
@@ -93,11 +105,25 @@ text.cleaner <- function(text.body, remove.profaity = TRUE){
     clean.text = gsub('\\bRT\\b', ' ', clean.text)
     # Regex was really figthing me when I tried to get RT: in one go
     clean.text = gsub(':', ' ', clean.text)
-    # Maybe remove duplicate tweets at this point
+    # Maybe remove duplicate tweets at this point?
     clean.text = iconv(clean.text, to="ASCII", sub=" ")
+#     clean.text = gsub("\\bdon't\\b", 'dont', clean.text)
+#     clean.text = gsub("\\bdidn't\\b", 'didnt', clean.text)
+#     clean.text = gsub("\\bcan't\\b", 'cant', clean.text)
+#     clean.text = gsub("\\bdoesn't\\b", 'doesnt', clean.text)
+#     clean.text = gsub("\\bwasn't\\b", 'wasnt', clean.text)
+#     clean.text = gsub("\\bisn't\\b", 'isnt', clean.text)
 }
 
 ```
+
+While capitolization, punctuation, and their full form may play an important 
+role when predicting, for now I am converting everything to lower case, removing 
+punctuation, and stemming the words. In text analysis it is common to remove
+stop words (the most commonly used words in a language) however for our purposes
+they will likely be the words we are using and predicting the most. So I am
+exploring both with them and without.
+
 
 ```{r cache = TRUE, echo = FALSE}
 # Prep the data for corpus
@@ -114,17 +140,18 @@ corp_sources <- VectorSource(lapply(list(blog_sample,
                                   news_sample), sourcify))
 
 corp <- Corpus(corp_sources, readerControl = list(language="en"))
-summary(corp)
+#summary(corp)
 
 corp <- tm_map(corp, removeNumbers)
 corp <- tm_map(corp, removePunctuation)
 corp <- tm_map(corp, tolower)
 # Maybe dont do this when predicting
+sw.removed.corp <- tm_map(corp, removeWords, stopwords("english"))
 corp <- tm_map(corp, stemDocument, language = "english")
 corp <- tm_map(corp, stripWhitespace)
 corp <- tm_map(corp, PlainTextDocument)
 
-sw.removed.corp <- tm_map(corp, removeWords, stopwords("english"))
+sw.removed.corp <- tm_map(sw.removed.corp, stemDocument, language = "english")
 sw.removed.corp <- tm_map(sw.removed.corp, stripWhitespace)
 sw.removed.corp <- tm_map(sw.removed.corp, PlainTextDocument)
 
@@ -143,66 +170,137 @@ sw.removed.ngram.dtm <- DocumentTermMatrix(sw.removed.corp,
 # inspect(corp[1])[[1]][1]
 ```
 
+## Interesting Findings
+
+### Unigrams 
+
+There are many, many, more words that are used rarely than thoughs that are used
+extreamly frequently. This pulls the histogram so far towards low numbers that
+the high frequency words aren't even visable.
+
 ```{r echo = FALSE}
 freq <- colSums(as.matrix(dtm))
 swr.freq <- colSums(as.matrix(sw.removed.dtm))
-length(freq)
+#length(freq)
 
 # shoudlnt be own var sort(freq) makes more sense maybe?
-ord <- order(freq)
+# ord <- order(freq)
 
-hist(freq)
-hist(freq[freq>10])
-hist(freq[freq>100])
-hist(freq[freq>1000])
+hist(freq, breaks = 100)
+```
 
+To highlight how many words are used only a handful of times and how frequently
+the most common words are used in a more visable way, I plotted the amount of 
+times each frequency occures.
+
+```{r echo = FALSE}
 freq.table = sort(table(freq))
 
-# Would be cool to make gif of below getting higer and higher
+# Could be cool to make gif of below getting higer and higher
 # freq.table = freq.table[as.numeric(names(freq.table))>8]
 # freq.table = freq.table[freq.table > 8]
 
 qplot(as.numeric(names(freq.table)), freq.table,
       xlab= 'Appearances in Corpus', ylab = '# of Words with x Appearences')
 
-dtms <- removeSparseTerms(dtm, 0.1) 
+```
 
-head(sort(freq, decreasing = TRUE), 200)
-head(sort(swr.freq, decreasing = TRUE), 200)
+If we look at the top twenty most commonly used words and their occurences, we 
+can see just how dominate the most coomon stop words are. Even compared to the
+top 50 most used words, "the" and "and" tower over the rest of the words.
+
+```{r echo = FALSE}
+#dtms <- removeSparseTerms(dtm, 0.1) 
+data.frame('occurences'=head(sort(freq, decreasing = TRUE), 20))
+over.100 <- (freq[freq>100])
+wordcloud(names(over.100), over.100, max.words=50, colors=brewer.pal(6, "Dark2"))
+```
+
+If we also look at these same breakdowns with stopwords removed, we don't see
+anything too surprising, they are all words we are used to commonly seeing.
+
+```{r}
+data.frame('occurences'= head(sort(swr.freq, decreasing = TRUE), 20))
 # Random inspections
 #inspect(dtms[, 5000:5020])
-over.100 <- (freq[freq>100])
-wordcloud(names(over.100), over.100, max.words=100, colors=brewer.pal(6, "Dark2"))
+
 swr.over.100 <- (swr.freq[swr.freq>100])
-wordcloud(names(swr.over.100), swr.over.100, max.words=100, colors=brewer.pal(6, "Dark2"))
+wordcloud(names(swr.over.100), swr.over.100, max.words=50, colors=brewer.pal(6, "Dark2"))
+```
+
+### N-grams
+
+We can repeat basically the same exercise on n-grams two to four words in 
+length. The histogram for this is so similarly skewed towards single digits that
+it isnt worth showing. Plotting the frequency of occurence counts is also rather
+similar:
 
 
-
+```{r echo=FALSE}
 nfreq <- colSums(as.matrix(ngram.dtm))
-head(sort(nfreq, decreasing = TRUE), 200)
-wordcloud(names(nfreq), nfreq, max.words=100, colors=brewer.pal(6, "Dark2"))
-#ngram.dtm
 
 nfreq.table = sort(table(nfreq))
 qplot(as.numeric(names(nfreq.table)), nfreq.table,
       xlab= 'Appearances in Corpus', ylab = '# of Phrases with x Appearences')
+
 ```
 
-## n-grams
+When we look at the most common n-grams, unsurprisingly it's basically just
+combinations of common stopwords.
 
 ```{r echo = FALSE}
-swr.ngram.freq <- colSums(as.matrix(sw.removed.ngram.dtm))
-head(sort(swr.ngram.freq, decreasing = TRUE), 200)
-wordcloud(names(swr.ngram.freq), swr.ngram.freq, max.words=100, colors=brewer.pal(6, "Dark2"))
-
-hist(swr.ngram.freq[swr.ngram.freq>20])
-
+data.frame('occurences' = head(sort(nfreq, decreasing = TRUE), 20))
+wordcloud(names(nfreq), nfreq, max.words=50, colors=brewer.pal(6, "Dark2"))
 ```
 
-Removing punctuation is doing apostrophies in a weird way, breaking won't etc.
 
-most popular bi and tri grams by source
-Check for repetative long n-grams (are likelty bad to keep if boilerplate)
-Remove unix things
 
-mycorpusname[[3]]$content[20]
+```{r echo = FALSE}
+trouble <- c('don t',
+             'didn t',
+             'can t',
+             'doesn t',
+             'isn t',
+             'wasn t',
+             't know')
+
+swr.ngram.freq <- colSums(as.matrix(sw.removed.ngram.dtm))
+swr.ngram.freq <- swr.ngram.freq[!(names(swr.ngram.freq) %in% trouble)]
+head(sort(swr.ngram.freq, decreasing = TRUE), 20)
+wordcloud(names(swr.ngram.freq), swr.ngram.freq, max.words=45,
+          colors=brewer.pal(6, "Dark2"))
+```
+
+## Plans for prediction algorithm and app 
+
+A few things to improve data integrity:
+
+* Check for repetative long n-grams (are likelty bad to keep if they are just
+boilerplate items in blogs or news).
+
+* Consider remove duplicate tweets since if they are just coppies their phrases
+aren't actually more common.
+
+* Once everything is working use a larger sample than 1% and see if it improves
+results.
+
+For the algorithm:
+
+* Figure out how to spit the last word off all the n-grams and find probablilty
+of what word will follow it.
+
+* Turn that into a marcov chain to use when predicting the next word.
+
+* Learn more about backoff models and smoothing algorithms since they both
+sound like they will lead to better predictions.
+
+The app
+
+* Hopefully this part will be pretty straightforward once everything else is
+done. I am planning to just return the most likely answer when text is entered
+by the user. If it's possible to do so fast enough, I would love to return the
+top three most likely next words.
+
+
+
+
