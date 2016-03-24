@@ -3,43 +3,49 @@ library(stringi)
 library(magrittr)
 
 # Get text files into corpus
-# corp <- textfile(c('sample/twitter_sample.txt',
-#                       'sample/blog_sample.txt',
-#                       'sample/news_sample.txt')) %>%
-#     corpus()
-# Bump up sample size
-corp <- textfile(c('sample/twitter_sample10.txt',
-                   'sample/blog_sample10.txt',
-                   'sample/news_sample10.txt')) %>%
+corp <- textfile(c('sample/twitter_sample.txt',
+                      'sample/blog_sample.txt',
+                      'sample/news_sample.txt')) %>%
     corpus()
+# Bump up sample size
+# corp <- textfile(c('sample/twitter_sample10.txt',
+#                    'sample/blog_sample10.txt',
+#                    'sample/news_sample10.txt')) %>%
+#     corpus()
 
 # set up all the ngram counts
 ungrams <- dfm(corp, removeTwitter = TRUE) %>% 
-    colSums(text.dfm)
+    colSums()
 
 bigrams <- dfm(corp, removeTwitter = TRUE, ngrams = 2 ) %>% 
-    colSums(text.dfm)
+    colSums()
 
 trigrams <- dfm(corp, removeTwitter = TRUE, ngrams = 3) %>% 
-    colSums(text.dfm)
+    colSums()
 
 quadgrams <- dfm(corp, removeTwitter = TRUE, ngrams = 4) %>% 
-    colSums(text.dfm)
+    colSums()
+
+pentagrams <- dfm(corp, removeTwitter = TRUE, ngrams = 5) %>% 
+    colSums()
 
 # Function to return the three most common ngrams
 predictor <- function(input_text){
     len = stri_count_words(input_text)
     word = gsub(' ', '_', input_text)
     pattern = paste0('^(', word, ')_.*')
-    if (len == 3){
+    if(len == 4){
+        res = head(sort(pentagrams[grepl(pattern, names(pentagrams))],
+                        decreasing = TRUE), 3)
+    }else if (len == 3){
         res = head(sort(quadgrams[grepl(pattern, names(quadgrams))],
-                        decreasing = TRUE),3)
+                        decreasing = TRUE), 3)
     }else if (len == 2){
         res = head(sort(trigrams[grepl(pattern, names(trigrams))],
-                        decreasing = TRUE),3)
+                        decreasing = TRUE), 3)
     }else if (len == 1){
         res = head(sort(bigrams[grepl(pattern, names(bigrams))],
-                        decreasing = TRUE),3)
+                        decreasing = TRUE), 3)
     }
     names(res) = gsub('_', ' ',names(res))
     res
@@ -81,5 +87,4 @@ backoff("Ohhhhh #PointBreak is on tomorrow. Love that film and haven't seen it i
 backoff("After the ice bucket challenge Louis will push his long wet hair out of his eyes with his little")
 backoff("Be grateful for the good times and keep the faith during the")
 backoff("If this isn't the cutest thing you've ever seen, then you must be")
-
 
