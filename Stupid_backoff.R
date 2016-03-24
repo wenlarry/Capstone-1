@@ -51,6 +51,8 @@ shortener <- function(input_text, new_length){
         paste(collapse = " ")
 }
 
+
+# Possibly convert to a non-recursive version and if fast vote in final?
 backoff <- function(input_text){
     len = stri_count_words(input_text)
     if (len > 3){
