@@ -15,6 +15,16 @@ write(twit_sample,'sample/twitter_sample.txt')
 write(blog_sample, 'sample/blog_sample.txt')
 write(news_sample, 'sample/news_sample.txt')
 
+# Sample each of them at 10% now
+twit_sample <- en_twit[sample(nrow(en_twit), round(nrow(en_twit)*.1)),]
+blog_sample <- en_blog[sample(nrow(en_blog), round(nrow(en_blog)*.1)),]
+news_sample <- en_news[sample(nrow(en_news), round(nrow(en_news)*.1)),]
+
+# Write test files to test dir so easy to build Corpus
+write(twit_sample,'sample/twitter_sample10.txt')
+write(blog_sample, 'sample/blog_sample10.txt')
+write(news_sample, 'sample/news_sample10.txt')
+
 # If using interactively, uncomment below to drop the big files from env:
 # rm(en_blog)
 # rm(en_news)
