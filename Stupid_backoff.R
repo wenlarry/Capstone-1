@@ -14,7 +14,7 @@ corp <- textfile(c('sample/twitter_sample.txt',
 #     corpus()
 
 # set up all the ngram counts
-ungrams <- dfm(corp, removeTwitter = TRUE) %>% 
+unigrams <- dfm(corp, removeTwitter = TRUE) %>% 
     colSums()
 
 bigrams <- dfm(corp, removeTwitter = TRUE, ngrams = 2 ) %>% 
