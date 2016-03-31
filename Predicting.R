@@ -8,6 +8,12 @@ corp <- textfile(c('sample/twitter_sample.txt',
                    'sample/news_sample.txt')) %>%
     corpus()
 
+# Bump up sample size
+corp <- textfile(c('sample/twitter_sample10.txt',
+                   'sample/blog_sample10.txt',
+                   'sample/news_sample10.txt')) %>%
+    corpus()
+
 # set up all the ngram counts
 unigrams <- dfm(corp, removeTwitter = TRUE) %>% 
     colSums()
@@ -55,10 +61,26 @@ src_prep <- function(word_list, num_words){
 
 predictor <- function(input_text){
     words = unlist(str_split(input_text, ' '))
-    print(bi_probs[bi_probs$start == src_prep(words, 1),])
-    print(tri_probs[tri_probs$start == src_prep(words, 2),])
-    print(quad_probs[quad_probs$start == src_prep(words, 3),])
+    bi = bi_probs[bi_probs$start == src_prep(words, 1),]
+    tri = tri_probs[tri_probs$start == src_prep(words, 2),]
+    quad = quad_probs[quad_probs$start == src_prep(words, 3),]
+    bi$prob = bi$prob * .2
+    tri$prob = tri$prob * .3
+    quad$prob = quad$prob * .5
+    rbind(bi,tri,quad) %>%
+        group_by(end) %>%
+        summarise('weight_prob' =sum(prob)) %>%
+        arrange(desc(weight_prob))
 }
 
-predictor('i love it')
+predictor("The guy in front of me just bought a pound of bacon, a bouquet, and a case of")
+predictor("You're the reason why I smile everyday. Can you follow me please? It would mean the")
+predictor("Hey sunshine, can you follow me and make me the")
+predictor("Very early observations on the Bills game: Offense still struggling but the")
+predictor("Go on a romantic date at the")
+predictor("Well I'm pretty sure my granny has some old bagpipes in her garage I'll dust them off and be on my")
+predictor("Ohhhhh #PointBreak is on tomorrow. Love that film and haven't seen it in quite some")
+predictor("After the ice bucket challenge Louis will push his long wet hair out of his eyes with his little")
+predictor("Be grateful for the good times and keep the faith during the")
+predictor("If this isn't the cutest thing you've ever seen, then you must be")
 
