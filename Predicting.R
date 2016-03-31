@@ -12,7 +12,7 @@ corp <- textfile(c('sample/twitter_sample.txt',
 unigrams <- dfm(corp, removeTwitter = TRUE) %>% 
     colSums()
 
-bigrams2 <- dfm(corp, removeTwitter = TRUE, ngrams = 2 ) %>% 
+bigrams <- dfm(corp, removeTwitter = TRUE, ngrams = 2 ) %>% 
     colSums()
 
 trigrams <- dfm(corp, removeTwitter = TRUE, ngrams = 3) %>% 
@@ -22,7 +22,9 @@ quadgrams <- dfm(corp, removeTwitter = TRUE, ngrams = 4) %>%
     colSums()
 
 ngram_prob <- function(ngram){
-    # Possibly take only those greater than 1
+    # Take only those greater than 1
+    ngram = ngram[ngram > 1]
+    # Check if unigram or ngram (could probably be done better)
     if(grepl('_', names(ngram[1]))){
         df = data.frame(str_split_fixed(names(ngram), '_(?!.*_)', 2),
                    as.numeric(ngram),
@@ -45,5 +47,18 @@ bi_probs <- ngram_prob(bigrams)
 tri_probs <- ngram_prob(trigrams)
 quad_probs <- ngram_prob(quadgrams)
 
+src_prep <- function(word_list, num_words){
+    len = length(word_list)
+    word_list[(len-(num_words-1)):len] %>%
+        paste(collapse = "_")
+}
 
+predictor <- function(input_text){
+    words = unlist(str_split(input_text, ' '))
+    print(bi_probs[bi_probs$start == src_prep(words, 1),])
+    print(tri_probs[tri_probs$start == src_prep(words, 2),])
+    print(quad_probs[quad_probs$start == src_prep(words, 3),])
+}
+
+predictor('i love it')
 
