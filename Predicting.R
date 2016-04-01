@@ -60,6 +60,7 @@ src_prep <- function(word_list, num_words){
 }
 
 predictor <- function(input_text){
+    input_text = tolower(input_text)
     words = unlist(str_split(input_text, ' '))
     bi = bi_probs[bi_probs$start == src_prep(words, 1),]
     tri = tri_probs[tri_probs$start == src_prep(words, 2),]
@@ -84,3 +85,17 @@ predictor("After the ice bucket challenge Louis will push his long wet hair out 
 predictor("Be grateful for the good times and keep the faith during the")
 predictor("If this isn't the cutest thing you've ever seen, then you must be")
 
+# Quize 3
+predictor("When you breathe, I want to be the air for you. I'll be there for you, I'd live and I'd")
+predictor("Guy at my table's wife got up to go to the bathroom and I asked about dessert and he started telling me about his")
+predictor("I'd give anything to see arctic monkeys this")
+predictor("Talking to your mom has the same effect as a hug and helps reduce your")
+predictor("When you were in Holland you were like 1 inch away from me but you hadn't time to take a")
+predictor("I'd just like all of these questions answered, a presentation of evidence, and a jury to settle the")
+predictor("I can't deal with unsymetrical things. I can't even hold an uneven number of bags of groceries in each")
+predictor("Every inch of you is perfect from the bottom to the")
+predictor("I'm thankful my childhood was filled with imagination and bruises from playing")
+predictor("I like how the same people are in almost all of Adam Sandler's")
+
+
+foo <- dfm(corp, removeTwitter = TRUE, ngrams = 4)
