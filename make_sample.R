@@ -1,3 +1,4 @@
+library(dplyr)
 library(readr)
 
 # Read everything in from the file provided on Coursera
@@ -24,6 +25,31 @@ news_sample <- en_news[sample(nrow(en_news), round(nrow(en_news)*.1)),]
 write(twit_sample,'sample/twitter_sample10.txt')
 write(blog_sample, 'sample/blog_sample10.txt')
 write(news_sample, 'sample/news_sample10.txt')
+
+# Set up training and test set 
+twit_sample <- en_twit[sample(nrow(en_twit), round(nrow(en_twit)*.2)),]
+blog_sample <- en_blog[sample(nrow(en_blog), round(nrow(en_blog)*.2)),]
+news_sample <- en_news[sample(nrow(en_news), round(nrow(en_news)*.2)),]
+
+train_twit <- sample_frac(twit_sample, 0.7)
+twit_sid <- as.numeric(rownames(train_twit))
+test_twit <- twit_sample[-twit_sid,]
+
+train_blog <- sample_frac(blog_sample, 0.7)
+blog_sid <- as.numeric(rownames(train_blog))
+test_blog <- blog_sample[-blog_sid,]
+
+train_news <- sample_frac(news_sample, 0.7)
+news_sid <- as.numeric(rownames(train_news))
+test_news <- news_sample[-news_sid,]
+
+write(train_twit,'sample/train_twit.txt')
+write(train_blog, 'sample/train_blog.txt')
+write(train_news, 'sample/train_news.txt')
+
+write(test_twit,'sample/test_twit.txt')
+write(test_blog, 'sample/test_blog.txt')
+write(test_news, 'sample/test_news.txt')
 
 # If using interactively, uncomment below to drop the big files from env:
 # rm(en_blog)
