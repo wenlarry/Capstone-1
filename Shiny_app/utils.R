@@ -1,0 +1,1 @@
+shinytest <- function(words){tolower(words)}
