@@ -1,6 +1,9 @@
 library(dplyr)
 library(readr)
 
+### Write stoped working so I broke something somehow? Possible update
+### all to write.table as seen in training/test set.
+
 # Read everything in from the file provided on Coursera
 en_twit <- read_table('final/en_US/en_US.twitter.txt', col_names = FALSE)
 en_blog <- read_table('final/en_US/en_US.blogs.txt', col_names = FALSE)
@@ -43,13 +46,19 @@ train_news <- sample_frac(news_sample, 0.7)
 news_sid <- as.numeric(rownames(train_news))
 test_news <- news_sample[-news_sid,]
 
-write(train_twit,'sample/train_twit.txt')
-write(train_blog, 'sample/train_blog.txt')
-write(train_news, 'sample/train_news.txt')
+write.table(train_twit, 'sample/train_twit.txt', quote = FALSE,
+            row.names = FALSE, col.names = FALSE)
+write.table(train_blog, 'sample/train_blog.txt', quote = FALSE,
+            row.names = FALSE, col.names = FALSE)
+write.table(train_news, 'sample/train_news.txt', quote = FALSE,
+            row.names = FALSE, col.names = FALSE)
 
-write(test_twit,'sample/test_twit.txt')
-write(test_blog, 'sample/test_blog.txt')
-write(test_news, 'sample/test_news.txt')
+write.table(test_twit, 'sample/test_twit.txt', quote = FALSE,
+            row.names = FALSE, col.names = FALSE)
+write.table(test_blog, 'sample/test_blog.txt', quote = FALSE,
+            row.names = FALSE, col.names = FALSE)
+write.table(test_news, 'sample/test_news.txt', quote = FALSE,
+            row.names = FALSE, col.names = FALSE)
 
 # If using interactively, uncomment below to drop the big files from env:
 # rm(en_blog)

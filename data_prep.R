@@ -25,7 +25,7 @@ quadgrams <- dfm(corp, removeTwitter = TRUE, ngrams = 4) %>%
 
 #
 uni_DT <- data.table(ngram = names(unigrams), count = unigrams)
-uni_DT$Pkn <- uni_DT$count/(sum(uni_DT$count)-3)
+uni_DT$Pkn <- uni_DT$count/sum(uni_DT$count)
 setkey(uni_DT)
 
 
@@ -54,3 +54,7 @@ N1plus <- table(tri_DT$start)[tri_DT$start]
 bi_pkn <- bi_DT[tri_DT$start,]$Pkn
 tri_DT$Pkn <- sapply((A-D),max, 0)/ B + D/B * N1plus * bi_pkn
 
+
+saveRDS(uni_DT, "Shiny_app/tables/uni_DT.rds")
+saveRDS(bi_DT, "Shiny_app/tables/bi_DT.rds")
+saveRDS(tri_DT, "Shiny_app/tables/tri_DT.rds")
