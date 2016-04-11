@@ -33,7 +33,7 @@ bi_DT <- data.table(ngram = names(bigrams), count = bigrams)
 bi_DT[,c("start", "end") := tstrsplit(ngram, "_(?!.*_)", perl = TRUE)]
 setkey(bi_DT)
 A <- bi_DT$count
-#should remove encoded things (thought I already did??)
+#should remove encoded things?
 B <- uni_DT[bi_DT$start,]$count
 N <- tabulate(bi_DT$count)
 D <- N[1] / (N[1] + 2 * N[2])

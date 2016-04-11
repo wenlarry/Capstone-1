@@ -15,7 +15,9 @@ src_prep <- function(word_list, num_words){
 
 kn_predictor <- function(input_text){
     input_text = tolower(input_text)
+    input_text = gsub("[[:punct:]]",'' , input_text)
     words = unlist(str_split(input_text, ' '))
+    # subset for these might be faster, keep it as data.table
     uni = uni_DT[uni_DT$ngram == src_prep(words, 1)]
     bi = bi_DT[bi_DT$start == src_prep(words, 1),]
     tri = tri_DT[tri_DT$start == src_prep(words, 2),]
