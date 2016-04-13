@@ -5,9 +5,9 @@ library(stringr)
 
 
 # Get text files into corpus
-corp <- textfile(c('sample/twitter_sample.txt',
-                   'sample/blog_sample.txt',
-                   'sample/news_sample.txt')) %>%
+corp <- textfile(c('sample/train_twit.txt',
+                   'sample/train_news.txt',
+                   'sample/train_blog.txt')) %>%
     corpus()
 
 # set up all the ngram counts
@@ -20,16 +20,18 @@ bigrams <- dfm(corp, removeTwitter = TRUE, ngrams = 2 ) %>%
 trigrams <- dfm(corp, removeTwitter = TRUE, ngrams = 3) %>% 
     colSums()
 
-quadgrams <- dfm(corp, removeTwitter = TRUE, ngrams = 4) %>% 
-    colSums()
+# quadgrams <- dfm(corp, removeTwitter = TRUE, ngrams = 4) %>% 
+#     colSums()
 
 #
 uni_DT <- data.table(ngram = names(unigrams), count = unigrams)
+uni_DT <- uni_DT[count > 1]
 uni_DT$Pkn <- uni_DT$count/sum(uni_DT$count)
 setkey(uni_DT)
 
 
 bi_DT <- data.table(ngram = names(bigrams), count = bigrams)
+bi_DT <- bi_DT[count > 1]
 bi_DT[,c("start", "end") := tstrsplit(ngram, "_(?!.*_)", perl = TRUE)]
 setkey(bi_DT)
 A <- bi_DT$count
@@ -44,6 +46,7 @@ bi_DT$Pkn <- sapply((A-D),max, 0)/ B + D/B * N1plus * N1plus2/N1plus3
 
 
 tri_DT <- data.table(ngram = names(trigrams), count = trigrams)
+tri_DT <- tri_DT[count > 1]
 tri_DT[,c("start", "end") := tstrsplit(ngram, "_(?!.*_)", perl = TRUE)]
 setkey(tri_DT)
 A <- tri_DT$count

@@ -30,9 +30,9 @@ write(blog_sample, 'sample/blog_sample10.txt')
 write(news_sample, 'sample/news_sample10.txt')
 
 # Set up training and test set 
-twit_sample <- en_twit[sample(nrow(en_twit), round(nrow(en_twit)*.2)),]
-blog_sample <- en_blog[sample(nrow(en_blog), round(nrow(en_blog)*.2)),]
-news_sample <- en_news[sample(nrow(en_news), round(nrow(en_news)*.2)),]
+twit_sample <- en_twit[sample(nrow(en_twit), round(nrow(en_twit)*.3)),]
+blog_sample <- en_blog[sample(nrow(en_blog), round(nrow(en_blog)*.3)),]
+news_sample <- en_news[sample(nrow(en_news), round(nrow(en_news)*.3)),]
 
 train_twit <- sample_frac(twit_sample, 0.7)
 twit_sid <- as.numeric(rownames(train_twit))

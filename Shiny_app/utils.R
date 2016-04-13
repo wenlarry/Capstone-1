@@ -1,4 +1,7 @@
+library(data.table)
+library(dplyr)
 library(stringr)
+
 
 uni_DT <- readRDS("tables/uni_DT.rds")
 bi_DT <- readRDS("tables/bi_DT.rds")
@@ -17,20 +20,16 @@ kn_predictor <- function(input_text){
     input_text = tolower(input_text)
     input_text = gsub("[[:punct:]]",'' , input_text)
     words = unlist(str_split(input_text, ' '))
-    # subset for these might be faster, keep it as data.table
-    uni = uni_DT[uni_DT$ngram == src_prep(words, 1)]
-    bi = bi_DT[bi_DT$start == src_prep(words, 1),]
-    tri = tri_DT[tri_DT$start == src_prep(words, 2),]
-    #quad = quad_probs[quad_probs$start == src_prep(words, 3),]
+    # so much faster as data.frame!!
+    uni = uni_DT[ngram == src_prep(words, 1)]
+    bi = bi_DT[start == src_prep(words, 1)]
+    tri = tri_DT[start == src_prep(words, 2)]
     uni$Pkn = uni$Pkn * .16
     bi$Pkn = bi$Pkn * .4
     tri$Pkn = tri$Pkn
-    #quad$prob = quad$prob
     pred = rbind(uni,bi,tri, fill=TRUE) %>%
         group_by(end) %>%
         summarise('weight_prob' = sum(Pkn)) %>%
         arrange(desc(weight_prob))
     pred
 }
-
-
