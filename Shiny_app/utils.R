@@ -7,6 +7,10 @@ uni_DT <- readRDS("tables/uni_DT.rds")
 bi_DT <- readRDS("tables/bi_DT.rds")
 tri_DT <- readRDS("tables/tri_DT.rds")
 
+#dirty.words.link <- 'http://raw.githubusercontent.com/shutterstock/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words/master/en'
+#dirty.words <- readLines(dirty.words.link)
+#dirty.words <- c(dirty.words, "hell")
+dirty.words <- c("damn", "hell")
 
 # Need to remove punctuation
 src_prep <- function(word_list, num_words){
@@ -21,11 +25,11 @@ no_result <- function(word_list){
         word_list[1:(length(word_list)-1)] %>%
             kn_predictor()
     }else{
-        NA
+        uni_DT[order(-Pkn)][1:20]
     }
 }
 
-kn_predictor <- function(input_text){
+kn_predictor <- function(input_text, profanity_filter){
     input_text = tolower(input_text)
     input_text = gsub("[[:punct:]]",'' , input_text)
     words = unlist(str_split(input_text, ' '))
@@ -33,18 +37,17 @@ kn_predictor <- function(input_text){
     #uni = uni_DT[ngram == src_prep(words, 1)]
     bi = bi_DT[start == src_prep(words, 1)]
     tri = tri_DT[start == src_prep(words, 2)]
-    #Can be faster?
     uni = uni_DT[end %in% c(bi$end,tri$end)]
-    # Oh I am absolutly using the unigram part wrong
     uni$Pkn = uni$Pkn * .16
     bi$Pkn = bi$Pkn * .4
     tri$Pkn = tri$Pkn
-    #print(rbind(uni,bi,tri, fill=TRUE))
     pred = rbind(uni,bi,tri, fill=TRUE) %>%
-    #pred = rbind(bi,tri, fill=TRUE) %>%
         group_by(end) %>%
         summarise('weight_prob' = sum(Pkn)) %>%
         arrange(desc(weight_prob))
+    if(profanity_filter){
+        pred = pred[!pred$end %in% dirty.words]
+    }
     if(is.na(pred[1]$end)){
         no_result(words)
     }else{

@@ -49,8 +49,8 @@ news_test$end <- gsub("[[:punct:]]", '', news_test$end) %>%
 
 table(twit_test$end == twit_test$pred)
 table(news_test$end == news_test$pred)
-View(twit_test)
-View(news_test)
+#View(twit_test)
+#View(news_test)
 
 # No stop words removed
 # 1% got 13/1000
