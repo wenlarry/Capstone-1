@@ -2,3 +2,7 @@ final/
 venv/
 .RData
 .RHistory
+.Rproj.user
+*config.py
+*rsconnect/
+*.pyc
