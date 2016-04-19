@@ -1,0 +1,42 @@
+Borrow my Swiftkey
+========================================================
+author: Scott Brenstuhl
+date: 4/18/16
+
+Description
+========================================================
+
+Borrow my Swiftkey allows you to select from a number of presidental canidates,
+R programmers, and hip hop artists so that you can see what it's like to use
+their Swiftkey.
+
+When you start entering your text, the app will predict what the next word you
+want to enter will be.
+
+Choose from: <br>
+Hillary Clinton, Bernie Sanders, Donald Trump, Ted Cruz, John Kasich, 
+Rodger Peng, Jeff Leek, Brian Caffo, Hillary Parker, Hadley Wickham, 
+Kanye West, Kendrick Lamar, or DJ Khaled.
+
+
+Instructions
+========================================================
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+
+Algorithm
+========================================================
+
+```{r}
+summary(cars)
+```
+
+How it Functions
+========================================================
+
+```{r}
+summary(cars)
+```
