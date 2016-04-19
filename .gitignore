@@ -6,3 +6,7 @@ venv/
 *config.py
 *rsconnect/
 *.pyc
+Shiny_app/alt_tables
+Shiny_app/tables
+Milestone_Report_cache/
+Milestone_Report_files/

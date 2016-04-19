@@ -10,6 +10,7 @@ corp <- textfile(c('sample/train_twit.txt',
                    'sample/train_blog.txt')) %>%
     corpus()
 
+
 # set up all the ngram counts
 unigrams <- dfm(corp, removeTwitter = TRUE) %>% 
     colSums()
@@ -60,3 +61,8 @@ tri_DT$Pkn <- sapply((A-D),max, 0)/ B + D/B * N1plus * bi_pkn
 saveRDS(uni_DT, "Shiny_app/tables/uni_DT.rds")
 saveRDS(bi_DT, "Shiny_app/tables/bi_DT.rds")
 saveRDS(tri_DT, "Shiny_app/tables/tri_DT.rds")
+
+dirty.words.link <- 'https://raw.githubusercontent.com/shutterstock/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words/master/en'
+dirty.words <- readLines(dirty.words.link)
+dirty.words <- c(dirty.words, "hell")
+saveRDS(dirty.words, "Shiny_app/tables/dirty_words.rds")

@@ -2,15 +2,11 @@ library(data.table)
 library(dplyr)
 library(stringr)
 
-
 uni_DT <- readRDS("tables/uni_DT.rds")
 bi_DT <- readRDS("tables/bi_DT.rds")
 tri_DT <- readRDS("tables/tri_DT.rds")
+dirty.words <- readRDS("tables/dirty_words.rds")
 
-#dirty.words.link <- 'http://raw.githubusercontent.com/shutterstock/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words/master/en'
-#dirty.words <- readLines(dirty.words.link)
-#dirty.words <- c(dirty.words, "hell")
-dirty.words <- c("damn", "hell")
 
 # Need to remove punctuation
 src_prep <- function(word_list, num_words){
@@ -29,7 +25,7 @@ no_result <- function(word_list){
     }
 }
 
-kn_predictor <- function(input_text, profanity_filter){
+kn_predictor <- function(input_text, profanity_filter = TRUE){
     input_text = tolower(input_text)
     input_text = gsub("[[:punct:]]",'' , input_text)
     words = unlist(str_split(input_text, ' '))
@@ -54,3 +50,5 @@ kn_predictor <- function(input_text, profanity_filter){
         return(pred)
     }
 }
+
+
