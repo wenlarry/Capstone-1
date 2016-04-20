@@ -21,22 +21,41 @@ Kanye West, Kendrick Lamar, or DJ Khaled.
 
 Instructions
 ========================================================
+- Go to: <href>https://808sandbr.shinyapps.io/Borrow_my_Swiftkey/</href><br>
+- Wait for the app to setup (about 15 second)
+- Enter your text into the text box.
+- The predictions for the next word will apear above the text box. The top ten 
+suggestions also appear in the table to the right.
+- Then you can select anyone's swiftkey from the "Who's Swiftkey" area and click
+"Change Person" to get predictions based on their tweets.
 
-```{r, echo=FALSE}
-plot(cars)
-```
-
-
-Algorithm
+Smoothing Algorithm
 ========================================================
+Based on
+<a href = 'https://lagunita.stanford.edu/c4x/Engineering/CS-224N/asset/slp4.pdf'>
+this paper</a> by Daniel Jurafsky & James H. Martin, I implemented a Kneser-Ney 
+smoothing algorithy so that we could account for their being ngrams that exist 
+but do not appear in our training data.
 
-```{r}
-summary(cars)
-```
+The general idea of this is that it takes away a small anount of the probablilty
+from all the ngrams and then redistributes it, giving extra weight to words that
+appear with more different ngrams preceeding them.
 
-How it Functions
+How it Functions (Prediction)
 ========================================================
+After pre-building probablility tables using the Kneser-Ney smoothing, I use
+interpolation to predict what the next word will be.
 
-```{r}
-summary(cars)
-```
+Based on the text entered it will take the last two words and gets the probabilty 
+of all the words that follow that bigram in our training set. 
+
+It then gets all of the words that follows the last word in the input, multiples
+it by 40% (as a penalty for unigrams giving less acuracy than trigrams) and adds
+them to the probabilites table.
+
+Finally it returns the probabilities summed by prediction and sorted by the most
+likely.
+
+
+
+
