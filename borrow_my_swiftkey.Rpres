@@ -6,7 +6,7 @@ date: 4/18/16
 Description
 ========================================================
 
-Borrow my Swiftkey allows you to select from a number of presidental canidates,
+Borrow my Swiftkey allows you to select from a number of presidential candidates,
 R programmers, and hip hop artists so that you can see what it's like to use
 their Swiftkey.
 
@@ -24,7 +24,7 @@ Instructions
 - Go to: <href>https://808sandbr.shinyapps.io/Borrow_my_Swiftkey/</href><br>
 - Wait for the app to setup (about 15 second)
 - Enter your text into the text box.
-- The predictions for the next word will apear above the text box. The top ten 
+- The predictions for the next word will appear above the text box. The top ten 
 suggestions also appear in the table to the right.
 - Then you can select anyone's swiftkey from the "Who's Swiftkey" area and click
 "Change Person" to get predictions based on their tweets.
@@ -34,24 +34,27 @@ Smoothing Algorithm
 Based on
 <a href = 'https://lagunita.stanford.edu/c4x/Engineering/CS-224N/asset/slp4.pdf'>
 this paper</a> by Daniel Jurafsky & James H. Martin, I implemented a Kneser-Ney 
-smoothing algorithy so that we could account for their being ngrams that exist 
+smoothing algorithm so that we could account for their being ngrams that exist 
 but do not appear in our training data.
 
-The general idea of this is that it takes away a small anount of the probablilty
+The general idea of this is that it takes away a small amount of the probability
 from all the ngrams and then redistributes it, giving extra weight to words that
-appear with more different ngrams preceeding them.
+appear with more different ngrams preceding them.
 
 How it Functions (Prediction)
 ========================================================
-After pre-building probablility tables using the Kneser-Ney smoothing, I use
+After pre-building probability tables using the Kneser-Ney smoothing, I use
 interpolation to predict what the next word will be.
 
-Based on the text entered it will take the last two words and gets the probabilty 
+Based on the text entered it will take the last two words and gets the probability 
 of all the words that follow that bigram in our training set. 
 
 It then gets all of the words that follows the last word in the input, multiples
-it by 40% (as a penalty for unigrams giving less acuracy than trigrams) and adds
-them to the probabilites table.
+it by 40% (as a penalty for unigrams giving less accuracy than trigrams) and adds
+them to the probabilities table.
+
+If the last word has never been seen before it will predict based on the word 
+preceding it.
 
 Finally it returns the probabilities summed by prediction and sorted by the most
 likely.

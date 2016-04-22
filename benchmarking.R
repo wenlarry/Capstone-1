@@ -7,7 +7,7 @@ twit_test <- readLines("sample/test_twit.txt") %>%
     data.table(ngram = .)
 
 news_test <- readLines("sample/test_news.txt") %>%
-    .[1:1000] %>%
+    .[1:5000] %>%
     data.table(ngram = .)
 
 # blog_test <- readLines("sample/test_blog.txt") %>%

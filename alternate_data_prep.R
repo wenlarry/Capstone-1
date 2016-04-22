@@ -96,3 +96,5 @@ all_tweeters <- c('HillaryClinton',
 for(twit_handle in all_tweeters){
     sorry_future_me(twit_handle)
 }
+
+#http://www.presidency.ucsb.edu/2016_election_speeches.php?candidate=70&campaign=2016CLINTON&doctype=5000

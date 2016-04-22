@@ -69,7 +69,7 @@ tweeters = [
     'hadleywickham',
     'kanyewest',
     'kendricklamar',
-    'Beyonce']
+    'djkhaled']
 
 
 everyones_tweets(tweeters)

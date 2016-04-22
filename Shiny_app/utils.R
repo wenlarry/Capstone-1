@@ -33,11 +33,12 @@ kn_predictor <- function(input_text, profanity_filter = TRUE){
     #uni = uni_DT[ngram == src_prep(words, 1)]
     bi = bi_DT[start == src_prep(words, 1)]
     tri = tri_DT[start == src_prep(words, 2)]
-    uni = uni_DT[end %in% c(bi$end,tri$end)]
-    uni$Pkn = uni$Pkn * .16
-    bi$Pkn = bi$Pkn * .4
+#    uni = uni_DT[end %in% c(bi$end,tri$end)]
+#    uni$Pkn = uni$Pkn * .16
+    bi$Pkn = bi$Pkn * .1
     tri$Pkn = tri$Pkn
-    pred = rbind(uni,bi,tri, fill=TRUE) %>%
+#    pred = rbind(uni,bi,tri, fill=TRUE) %>%
+    pred = rbind(bi,tri, fill=TRUE) %>%
         group_by(end) %>%
         summarise('weight_prob' = sum(Pkn)) %>%
         arrange(desc(weight_prob))
